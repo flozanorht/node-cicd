@@ -1,8 +1,9 @@
 pipeline {
     environment {
+        REPO='https://github.com/flozanorht/node-cicd.git'
+        DOMAIN='apps.ocp-flozano3.do280.dev.nextcle.com'
         PRJ="hello-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
         APP='nodeapp'
-        URL='apps.ocp-flozano3.do280.dev.nextcle.com'
     }
     agent {
       node {
@@ -20,12 +21,12 @@ pipeline {
                         openshift.newProject("${env.PRJ}")
                         openshift.withProject("${env.PRJ}") {
                             echo("Create application ${env.APP}") 
-                            openshift.newApp('https://github.com/flozanorht/node-cicd.git', "--name ${env.APP}")
+                            openshift.newApp("${env.REPO}", "--name ${env.APP}")
                             echo("Expose route for service ${env.APP}") 
                             // Default Jenkins settings to not allow to query properties of an object
                             // So we cannot query the widlcard domain of the ingress controller
                             // Nor the auto genereted host of a route
-                            openshift.expose("svc/${env.APP}", "--hostname ${env.APP}.${env.URL}")
+                            openshift.expose("svc/${env.APP}", "--hostname ${env.APP}.${env.DOMAIN}")
                         }
                     }
                 }
@@ -69,7 +70,7 @@ pipeline {
         stage('test') {
             steps {
                 echo("Check that '${route.host}' returns HTTP 200") 
-                sh("curl --fail ${env.APP}.${env.URL}")
+                sh("cDOMAIN --fail ${env.APP}.${env.DOMAIN}")
             }
         }
     }
