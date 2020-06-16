@@ -52,12 +52,12 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject("${env.PRJ}") {
-                            echo("Wait deployment from dc ${env.APP} to finish") 
+                            echo('Wait deployment from dc ${env.APP} to finish') 
                             timeout(5) {
                                 openshift.selector('dc', "${env.APP}").rollout().status()
-                                openshift.selector('dc', "${env.APP}").related('pods').untilEach(1) {
-                                    return (it.object().status.phase == "Running")
-                                }
+                                //openshift.selector('dc', "${env.APP}").related('pods').untilEach(1) {
+                                //    return (it.object().status.phase == "Running")
+                                //}
                             }
                         }
                     }
@@ -70,7 +70,7 @@ pipeline {
                     openshift.withCluster() {
                         openshift.withProject("${env.PRJ}") {
                             def host = openshift.selector('route', "${env.APP}").object.host
-                            echo("Check that app returns HTTP 200") 
+                            echo('Check that app returns HTTP 200') 
                             sh("curl --fail ${host}")
                         }
                     }
@@ -82,6 +82,7 @@ pipeline {
         always {
             script {
                 openshift.withCluster() {
+                    echo("Delete project ${env.PRJ}") 
                     openshift.delete("project/${env.PRJ}")
                 }
             }
