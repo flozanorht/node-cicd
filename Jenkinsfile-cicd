@@ -25,7 +25,7 @@ pipeline {
                             // Default Jenkins settings to not allow to query properties of an object
                             // So we cannot query the widlcard domain of the ingress controller
                             // Nor the auto genereted host of a route
-                            openshift.expose("svc/${env.APP}" "--hostname ${env.APP}.${env.URL}")
+                            openshift.expose("svc/${env.APP}", "--hostname ${env.APP}.${env.URL}")
                         }
                     }
                 }
