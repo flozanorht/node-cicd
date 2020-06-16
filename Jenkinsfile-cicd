@@ -3,9 +3,6 @@ pipeline {
         PRJ="hello-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
         APP='nodeapp'
     }
-    //options {
-    //    timeout(time: 10, unit: 'MINUTES')
-    //}
     agent {
       node {
         label 'nodejs'
@@ -15,7 +12,7 @@ pipeline {
         stage('create') {
             steps {
                 script {
-                    openshift.verbose()
+                    //openshift.verbose()
                     openshift.logLevel(1)
                     openshift.withCluster() {
                         openshift.newProject("${env.PRJ}")
@@ -33,7 +30,7 @@ pipeline {
                     openshift.withCluster() {
                         openshift.withProject("${env.PRJ}") {
                             def bc = openshift.selector('bc', "${env.APP}")
-                            timeout(360) {
+                            timeout(5) {
                                 def builds = bc.related('builds').untilEach(1) {
                                     def phase = it.object().status.phase
                                     if (phase == "Failed" || phase == "Error" || phase == "Cancelled") {
@@ -52,7 +49,7 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject("${env.PRJ}") {
-                            timeout(360) {
+                            timeout(5) {
                                 openshift.selector('dc', "${env.APP}").rollout().status()
                                 openshift.selector('dc', "${env.APP}").related('pods').untilEach(1) {
                                     return (it.object().status.phase == "Running")
