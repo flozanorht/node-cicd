@@ -70,7 +70,7 @@ pipeline {
         stage('test') {
             steps {
                 echo "Check that '${env.APP}.${env.DOMAIN}' returns HTTP 200"
-                sh "curl --fail ${env.APP}.${env.DOMAIN}"
+                sh "curl -s --fail ${env.APP}.${env.DOMAIN}"
             }
         }
     }
