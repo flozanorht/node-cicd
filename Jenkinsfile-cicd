@@ -13,11 +13,11 @@ pipeline {
             steps {
                 script {
                     openshift.verbose()
-                    openshift.logLevel(1)
+                    openshift.logLevel(0)
                     openshift.withCluster() {
                         openshift.newProject("${env.PRJ}")
                         openshift.withProject("${env.PRJ}") {
-                            openshift.newApp('https://github.com/fslozano/node-cicd', "--name NAME=${env.APP}")
+                            openshift.newApp('https://github.com/flozanorht/node-cicd.git', "--name ${env.APP}")
                         }
                     }
                 }
@@ -60,6 +60,15 @@ pipeline {
                             sh("curl --fail ${host}")
                         }
                     }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                openshift.withCluster() {
+                    openshift.delete("project/${env.PRJ}")
                 }
             }
         }
