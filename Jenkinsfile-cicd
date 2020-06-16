@@ -69,7 +69,7 @@ pipeline {
         }
         stage('test') {
             steps {
-                echo "Check that '${route.host}' returns HTTP 200"
+                echo "Check that '${env.APP}.${env.DOMAIN}' returns HTTP 200"
                 sh "curl --fail ${env.APP}.${env.DOMAIN}"
             }
         }
