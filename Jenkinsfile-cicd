@@ -12,6 +12,7 @@ pipeline {
         stage('create') {
             steps {
                 script {
+                    openshift.verbose()
                     openshift.withCluster() {
                         openshift.newProject("${env.PRJ}")
                         openshift.withProject("${env.PRJ}") {
