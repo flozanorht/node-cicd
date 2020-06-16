@@ -3,6 +3,9 @@ pipeline {
         PRJ="hello-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
         APP='nodeapp'
     }
+    //options {
+    //    timeout(time: 10, unit: 'MINUTES')
+    //}
     agent {
       node {
         label 'nodejs'
@@ -30,7 +33,9 @@ pipeline {
                         openshift.withProject("${env.PRJ}") {
                             def bc = openshift.selector('bc', "${env.APP}")
                             def builds = bc.related('builds').untilEach(1) {
-                                return (it.object().status.phase == "Complete")
+                                def phase = it.object().status.phase
+                                if (phase == "Failed") error 'Build error'
+                                return (phase == "Complete")
                             }
                         }
                     }
