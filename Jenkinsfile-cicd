@@ -16,11 +16,12 @@ pipeline {
             steps {
                 script {
                     openshift.verbose()
-                    openshift.logLevel(0)
+                    openshift.logLevel(1)
                     openshift.withCluster() {
                         openshift.newProject("${env.PRJ}")
                         openshift.withProject("${env.PRJ}") {
                             openshift.newApp('https://github.com/flozanorht/node-cicd.git', "--name ${env.APP}")
+                            openshift.expose("svc/${env.APP}")
                         }
                     }
                 }
@@ -32,10 +33,14 @@ pipeline {
                     openshift.withCluster() {
                         openshift.withProject("${env.PRJ}") {
                             def bc = openshift.selector('bc', "${env.APP}")
-                            def builds = bc.related('builds').untilEach(1) {
-                                def phase = it.object().status.phase
-                                if (phase == "Failed") error 'Build error'
-                                return (phase == "Complete")
+                            timeout(360) {
+                                def builds = bc.related('builds').untilEach(1) {
+                                    def phase = it.object().status.phase
+                                    if (phase == "Failed" || phase == "Error" || phase == "Cancelled") {
+                                        error 'OpenShift build failed or was cancelled'
+                                    }
+                                    return (phase == "Complete")
+                                }
                             }
                         }
                     }
@@ -47,9 +52,11 @@ pipeline {
                 script {
                     openshift.withCluster() {
                         openshift.withProject("${env.PRJ}") {
-                            openshift.selector('dc', "${env.APP}").rollout().status()
-                            openshift.selector('dc', "${env.APP}").related('pods').untilEach(1) {
-                                return (it.object().status.phase == "Running")
+                            timeout(360) {
+                                openshift.selector('dc', "${env.APP}").rollout().status()
+                                openshift.selector('dc', "${env.APP}").related('pods').untilEach(1) {
+                                    return (it.object().status.phase == "Running")
+                                }
                             }
                         }
                     }
