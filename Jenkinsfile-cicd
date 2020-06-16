@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        PRJ="hello-${env.BRANCH_NAME}-${env.$BUILD_NUMBER}"
+        PRJ="hello-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
         APP='nodeapp'
     }
     agent {
@@ -13,6 +13,7 @@ pipeline {
             steps {
                 script {
                     openshift.verbose()
+                    openshift.logLevel(1)
                     openshift.withCluster() {
                         openshift.newProject("${env.PRJ}")
                         openshift.withProject("${env.PRJ}") {
